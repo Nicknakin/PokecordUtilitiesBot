@@ -1,0 +1,15 @@
+{
+  "name": "summonerbot",
+  "version": "0.0.1",
+  "description": "Bot to summon pokemon from pokecord",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicholas Kinney",
+  "license": "ISC",
+  "dependencies": {
+    "discord.io": "^2.5.3",
+    "winston": "^3.0.0"
+  }
+}
