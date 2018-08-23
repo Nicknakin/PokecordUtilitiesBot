@@ -1,0 +1,4 @@
+Command|Usage
+s!start|Begin appending all pokemon messages to continuousMsg to be sent on command
+s!end|Send continuousMsg and clear it
+s!send|Same as s!end
