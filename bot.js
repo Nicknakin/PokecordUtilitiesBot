@@ -6,6 +6,7 @@ let csv = require('./list.csv');
 let continuousMsg = "";
 let interval;
 let counter = 0;
+let recording = false;
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -27,6 +28,11 @@ bot.on('message', (user, userID, channelID, message, evt) => {
         let cmd = message.substring(2).split(' ');
         if(cmd[0] == "start"){
             continuousMsg = "";
+            recording = true;
+            bot.sendMessage({
+                    to: evt.d.channel_id,
+                    message: "Started recording"
+            });
         }
         if(cmd[0] == "end" || cmd[0] == "send"){
             bot.sendMessage({
@@ -34,6 +40,7 @@ bot.on('message', (user, userID, channelID, message, evt) => {
                     message: continuousMsg
             });
             continuousMsg = "";
+            recording = false;
         }
     } 
 });
@@ -41,9 +48,8 @@ bot.on('message', (user, userID, channelID, message, evt) => {
 bot.on('any', (evt) => {
     let author = (evt.d && evt.d.author)? evt.d.author: {username: ""};
     let username = (author.username)? author.username: "";
-    if(username == "Pokécord"){
-        //Assume I figure out how to get the text, call it list
-        let embeds = evt.d.embeds;
+    let embeds = (evt.d && evt.d.embeds)? evt.d.embeds: "";
+    if(recording && username == "Pokécord" && embeds[0].title == "Your pokémon:"){
         let msg = (embeds[0].description);
         let list = msg.split('\n');
         for(let i = 0; i < list.length; i++){
