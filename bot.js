@@ -49,7 +49,7 @@ bot.on('any', (evt) => {
     let author = (evt.d && evt.d.author)? evt.d.author: {username: ""};
     let username = (author.username)? author.username: "";
     let embeds = (evt.d && evt.d.embeds)? evt.d.embeds: "";
-    if(recording && username == "Pokécord" && embeds[0].title == "Your pokémon:"){
+    if(recording && username == "Pokécord" && embeds[0].title && embeds[0].title == "Your pokémon:"){
         let msg = (embeds[0].description);
         let list = msg.split('\n');
         for(let i = 0; i < list.length; i++){
