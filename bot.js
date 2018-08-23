@@ -1,7 +1,9 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
+const fs = require('fs');
 let csv = require('./list.csv');
+let continuousMsg = "";
 let interval;
 let counter = 0;
 
@@ -17,36 +19,50 @@ var bot = new Discord.Client({
 });
 
 bot.on('ready', (evt) => {
-    logger.info('Logged in as', bot.username, bot.id);
+    console.log(`Logged in as ${bot.username} : ${bot.id}`);
 });
 
 bot.on('message', (user, userID, channelID, message, evt) => {
     if(message.substring(0,2) == "s!"){
         let cmd = message.substring(2).split(' ');
-    }
-    if(user == "Pokécord"){
+        if(cmd[0] == "start"){
+            continuousMsg = "";
+        }
+        if(cmd[0] == "end" || cmd[0] == "send"){
+            bot.sendMessage({
+                    to: evt.d.channel_id,
+                    message: continuousMsg
+            });
+            continuousMsg = "";
+        }
+    } 
+});
+
+bot.on('any', (evt) => {
+    let author = (evt.d && evt.d.author)? evt.d.author: {username: ""};
+    let username = (author.username)? author.username: "";
+    if(username == "Pokécord"){
         //Assume I figure out how to get the text, call it list
-        let list = "";
-        list = list.split('\n');
+        let embeds = evt.d.embeds;
+        let msg = (embeds[0].description);
+        let list = msg.split('\n');
         for(let i = 0; i < list.length; i++){
             list[i] = list[i].split('|');
-            list[1] = list[1].substring(7);
-            list[2] = list[2].substring(8);
+            list[i][0] = list[i][0].replace('*', '');
+            list[i][0] = list[i][0].replace('*', '');
+            list[i][0] = list[i][0].replace('*', '');
+            list[i][0] = list[i][0].replace('*', '');
+            list[i][1] = list[i][1].substring(8);
+            list[i][2] = list[i][2].substring(9);
+            list[i][3] = list[i][3].substring(5);
         }
         let newList = "";
-        for(entry in list){
-            for(item in entry){
-                list += item;
+        for(entry of list){
+            for(item of entry){
+                newList += item.replace(' ', '') + ',';
             }
-            list += '\n';
-            fs.access(file, fs.constants.F_OK | fs.constants.W_OK, (err) => {
-                if (err) {
-                    console.error(`${file} ${err.code === 'ENOENT' ? 'does not exist' : 'is read-only'}`);
-                } else {
-                    writeMyData(newList);
-                }
-            });
+            newList += '\n'; 
         }
-            
+        continuousMsg += newList;
     }
 });
