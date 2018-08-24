@@ -1,11 +1,6 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
-<<<<<<< HEAD
-=======
-const fs = require('fs');
-let csv = require('csv-file-creator');
->>>>>>> 5fa184552d5ef9562be003268334c13c371e37a8
 let continuousMsg = "";
 let interval;
 let counter = 0;
@@ -30,29 +25,19 @@ bot.on('message', (user, userID, channelID, message, evt) => {
     if(message.substring(0,2) == "s!"){
         let cmd = message.substring(2).split(' ');
         if(cmd[0] == "start"){
-            recording = true;
-            bot.sendMessage({
-                    to: evt.d.channel_id,
-                    message: "Started recording"
-            });
+            start(channelID);
         }
         if(cmd[0] == "end" || cmd[0] == "send"){
-            bot.sendMessage({
-                    to: evt.d.channel_id,
-                    message: continuousMsg
-            });
-            console.log(continuousMsg);
-            recording = false;
-            continuousMsg = "Pokémon,Level,Number,IV,Nickname\n";
+            end(channelID);
         }
-    } 
+    }
 });
 
 bot.on('any', (evt) => {
     let author = (evt.d && evt.d.author)? evt.d.author: {username: ""};
     let username = (author.username)? author.username: "";
     let embeds = (evt.d && evt.d.embeds)? evt.d.embeds: "";
-    if(recording && embeds && username == "Pokécord" && embeds[0].title && embeds[0].title == "Your pokémon:"){
+    if(recording && embeds && embeds[0] && username == "Pokécord" && embeds[0].title && embeds[0].title == "Your pokémon:"){
         let msg = (embeds[0].description);
         let list = msg.split('\n');
         for(let i = 0; i < list.length; i++){
@@ -73,8 +58,28 @@ bot.on('any', (evt) => {
             for(item of entry){
                 newList += item.replace(' ', '') + ',';
             }
-            newList = newList.substring(0, newList.length-1) + '\n'; 
+            newList = newList.substring(0, newList.length-1) + '\n';
         }
         continuousMsg += newList;
+        if(list.length < 20)
+          end(evt.d.channel_id);
     }
 });
+
+function start(channelID){
+  recording = true;
+  bot.sendMessage({
+          to: channelID,
+          message: "Started recording"
+  });
+  continuousMsg = "Pokémon,Level,Number,IV,Nickname\n";
+}
+
+function end(channelID){
+      console.log(bot.sendMessage({
+              to: channelID,
+              message: continuousMsg
+      }));
+      recording = false;
+      continuousMsg = "";
+}
